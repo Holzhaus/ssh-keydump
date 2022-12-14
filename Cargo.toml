@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
-ssh-key = { version = "0.5", features = ["rsa", "ed25519"] }
+ssh-key = { version = "0.5", features = ["rsa", "dsa", "std", "ecdsa", "ed25519", "encryption"] }
+sec1 = "0.3"

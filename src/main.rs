@@ -7,8 +7,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use clap::Parser;
+use sec1::point::{EncodedPoint, ModulusSize};
 use ssh_key::{
-    private::{Ed25519Keypair, Ed25519PrivateKey, KeypairData, RsaKeypair},
+    private::{EcdsaKeypair, Ed25519Keypair, Ed25519PrivateKey, KeypairData, RsaKeypair},
     public::Ed25519PublicKey,
     HashAlg, PrivateKey, Result,
 };
@@ -21,6 +22,47 @@ struct Cli {
     /// File to parse.
     #[arg(value_name = "FILE")]
     path: PathBuf,
+}
+
+fn dump_encoded_point<T>(point: &EncodedPoint<T>)
+where
+    T: ModulusSize,
+{
+    println!("  Point ({} bytes):", point.len());
+    println!("    Coordinates ({:?}):", point.tag());
+    if let Some(x) = point.x() {
+        println!("        x: {:02X?}", x);
+    }
+    if let Some(y) = point.y() {
+        println!("        y: {:02X?}", y);
+    }
+}
+
+fn dump_ecdsa_keypair(keypair: &EcdsaKeypair) {
+    println!("Curve: {:?}", keypair.curve());
+    match keypair {
+        EcdsaKeypair::NistP256 { public, private } => {
+            println!("Public Key:");
+            dump_encoded_point(public);
+            let private = private.as_slice();
+            println!("Private Key:");
+            println!("  Data ({} bytes): {:02X?}", private.len(), private);
+        }
+        EcdsaKeypair::NistP384 { public, private } => {
+            println!("Public Key:");
+            dump_encoded_point(public);
+            let private = private.as_slice();
+            println!("Private Key:");
+            println!("  Data ({} bytes): {:02X?}", private.len(), private);
+        }
+        EcdsaKeypair::NistP521 { public, private } => {
+            println!("Public Key:");
+            dump_encoded_point(public);
+            let private = private.as_slice();
+            println!("Private Key:");
+            println!("  Data ({} bytes): {:02X?}", private.len(), private);
+        }
+    }
 }
 
 fn dump_ed25519_keypair(keypair: &Ed25519Keypair) {
@@ -70,6 +112,7 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
     );
 
     match key.key_data() {
+        KeypairData::Ecdsa(keypair) => dump_ecdsa_keypair(keypair),
         KeypairData::Ed25519(keypair) => dump_ed25519_keypair(keypair),
         KeypairData::Rsa(keypair) => dump_rsa_keypair(keypair),
         _ => (),
