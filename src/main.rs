@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use clap::Parser;
-use ssh_key::{PrivateKey, Result};
+use ssh_key::{HashAlg, PrivateKey, Result};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -20,7 +20,20 @@ struct Cli {
 }
 
 fn dump_private_key(key: PrivateKey) -> Result<()> {
-    println!("{:#?}", key);
+    println!("Algorithm: {}", key.algorithm());
+    println!("Cipher: {}", key.cipher());
+    println!("Comment: {:?}", key.comment());
+    println!("Encrypted: {:?}", key.is_encrypted());
+    println!("KDF: {:02X?}", key.kdf());
+    println!("Fingerprints:");
+    println!(
+        "    SHA256: {:02X?}",
+        key.fingerprint(HashAlg::Sha256).as_bytes()
+    );
+    println!(
+        "    SHA512: {:02X?}",
+        key.fingerprint(HashAlg::Sha512).as_bytes()
+    );
 
     Ok(())
 }
