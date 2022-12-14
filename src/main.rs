@@ -160,6 +160,9 @@ fn dump_private_key(key: PrivateKey, decrypt: bool) -> Result<()> {
         KeypairData::Rsa(keypair) => dump_rsa_keypair(keypair),
         KeypairData::SkEcdsaSha2NistP256(keypair) => dump_skecdsasha2nistp256_keypair(keypair),
         KeypairData::SkEd25519(keypair) => dump_sked25519_keypair(keypair),
+        KeypairData::Encrypted(data) => {
+            println!("Encrypted Data ({} bytes): {:02X?}", data.len(), &data)
+        }
         _ => (),
     }
 
