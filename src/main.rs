@@ -7,7 +7,11 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use clap::Parser;
-use ssh_key::{HashAlg, PrivateKey, Result};
+use ssh_key::{
+    private::{Ed25519Keypair, Ed25519PrivateKey, KeypairData, RsaKeypair},
+    public::Ed25519PublicKey,
+    HashAlg, PrivateKey, Result,
+};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -17,6 +21,36 @@ struct Cli {
     /// File to parse.
     #[arg(value_name = "FILE")]
     path: PathBuf,
+}
+
+fn dump_ed25519_keypair(keypair: &Ed25519Keypair) {
+    let public_key = &keypair.public;
+    println!("Public Key:");
+    println!(
+        "    data ({} bytes): {:02X?}",
+        Ed25519PublicKey::BYTE_SIZE,
+        public_key.0
+    );
+    println!("Private Key:");
+    let private_key = &keypair.private;
+    println!(
+        "    data ({} bytes): {:02X?}",
+        Ed25519PrivateKey::BYTE_SIZE,
+        private_key.to_bytes()
+    );
+}
+
+fn dump_rsa_keypair(keypair: &RsaKeypair) {
+    let public_key = &keypair.public;
+    println!("Public Key:");
+    println!("    e: {}", public_key.e);
+    println!("    n: {}", public_key.n);
+    println!("Private Key:");
+    let private_key = &keypair.private;
+    println!("    d: {}", private_key.d);
+    println!("    iqmp: {}", private_key.iqmp);
+    println!("    p: {}", private_key.p);
+    println!("    q: {}", private_key.q);
 }
 
 fn dump_private_key(key: PrivateKey) -> Result<()> {
@@ -34,6 +68,12 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
         "    SHA512: {:02X?}",
         key.fingerprint(HashAlg::Sha512).as_bytes()
     );
+
+    match key.key_data() {
+        KeypairData::Ed25519(keypair) => dump_ed25519_keypair(keypair),
+        KeypairData::Rsa(keypair) => dump_rsa_keypair(keypair),
+        _ => (),
+    }
 
     Ok(())
 }
