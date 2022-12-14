@@ -25,6 +25,9 @@ struct Cli {
     /// File to parse.
     #[arg(value_name = "FILE")]
     path: PathBuf,
+    /// If the key is encrypted, prompt for a passphrase and try to decrypt it.
+    #[arg(short, long)]
+    decrypt: bool,
 }
 
 fn dump_encoded_point<T>(point: &EncodedPoint<T>)
@@ -132,7 +135,7 @@ fn dump_sked25519_keypair(keypair: &SkEd25519) {
     );
 }
 
-fn dump_private_key(key: PrivateKey) -> Result<()> {
+fn dump_private_key(key: PrivateKey, decrypt: bool) -> Result<()> {
     println!("Algorithm: {}", key.algorithm());
     println!("Cipher: {}", key.cipher());
     println!("Comment: {:?}", key.comment());
@@ -141,6 +144,14 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
     println!("Fingerprints:");
     println!("    SHA256: {}", key.fingerprint(HashAlg::Sha256));
     println!("    SHA512: {}", key.fingerprint(HashAlg::Sha512));
+
+    // Decrypt key (if applicable and desired).
+    let key = if key.is_encrypted() && decrypt {
+        let passphrase = rpassword::prompt_password("Passphase: ");
+        key.decrypt(passphrase.expect("Failed to read passphrase"))?
+    } else {
+        key
+    };
 
     match key.key_data() {
         KeypairData::Ecdsa(keypair) => dump_ecdsa_keypair(keypair),
@@ -158,5 +169,5 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
 fn main() -> Result<()> {
     let args = Cli::parse();
     let private_key = PrivateKey::read_openssh_file(&args.path)?;
-    dump_private_key(private_key)
+    dump_private_key(private_key, args.decrypt)
 }
