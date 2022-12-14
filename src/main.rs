@@ -11,6 +11,7 @@ use sec1::point::{EncodedPoint, ModulusSize};
 use ssh_key::{
     private::{
         DsaKeypair, EcdsaKeypair, Ed25519Keypair, Ed25519PrivateKey, KeypairData, RsaKeypair,
+        SkEcdsaSha2NistP256,
     },
     public::Ed25519PublicKey,
     HashAlg, PrivateKey, Result,
@@ -109,6 +110,15 @@ fn dump_rsa_keypair(keypair: &RsaKeypair) {
     println!("    q: {}", private_key.q);
 }
 
+fn dump_skecdsasha2nistp256_keypair(keypair: &SkEcdsaSha2NistP256) {
+    println!("Flags: {:08b}", keypair.flags());
+    println!("Key Handle: {:02X?}", keypair.key_handle());
+    let public_key = keypair.public();
+    println!("Public Key:");
+    println!("    Application: {}", public_key.application());
+    dump_encoded_point(public_key.ec_point());
+}
+
 fn dump_private_key(key: PrivateKey) -> Result<()> {
     println!("Algorithm: {}", key.algorithm());
     println!("Cipher: {}", key.cipher());
@@ -130,6 +140,7 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
         KeypairData::Ed25519(keypair) => dump_ed25519_keypair(keypair),
         KeypairData::Dsa(keypair) => dump_dsa_keypair(keypair),
         KeypairData::Rsa(keypair) => dump_rsa_keypair(keypair),
+        KeypairData::SkEcdsaSha2NistP256(keypair) => dump_skecdsasha2nistp256_keypair(keypair),
         _ => (),
     }
 
