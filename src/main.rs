@@ -9,7 +9,9 @@
 use clap::Parser;
 use sec1::point::{EncodedPoint, ModulusSize};
 use ssh_key::{
-    private::{EcdsaKeypair, Ed25519Keypair, Ed25519PrivateKey, KeypairData, RsaKeypair},
+    private::{
+        DsaKeypair, EcdsaKeypair, Ed25519Keypair, Ed25519PrivateKey, KeypairData, RsaKeypair,
+    },
     public::Ed25519PublicKey,
     HashAlg, PrivateKey, Result,
 };
@@ -82,6 +84,18 @@ fn dump_ed25519_keypair(keypair: &Ed25519Keypair) {
     );
 }
 
+fn dump_dsa_keypair(keypair: &DsaKeypair) {
+    let public_key = &keypair.public;
+    println!("Public Key:");
+    println!("    p: {:02X?}", public_key.p);
+    println!("    q: {:02X?}", public_key.q);
+    println!("    g: {:02X?}", public_key.g);
+    println!("    y: {:02X?}", public_key.y);
+    println!("Private Key:");
+    let private_key = &keypair.private;
+    println!("    x: {:02X?}", private_key.as_mpint());
+}
+
 fn dump_rsa_keypair(keypair: &RsaKeypair) {
     let public_key = &keypair.public;
     println!("Public Key:");
@@ -114,6 +128,7 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
     match key.key_data() {
         KeypairData::Ecdsa(keypair) => dump_ecdsa_keypair(keypair),
         KeypairData::Ed25519(keypair) => dump_ed25519_keypair(keypair),
+        KeypairData::Dsa(keypair) => dump_dsa_keypair(keypair),
         KeypairData::Rsa(keypair) => dump_rsa_keypair(keypair),
         _ => (),
     }
