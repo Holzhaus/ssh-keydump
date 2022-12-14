@@ -2,8 +2,14 @@
 name = "ssh-keydump"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Jan Holthuis <jan.holthuis@ruhr-uni-bochum.de>"]
+description = "Simple tool to inspect OpenSSH keys."
+readme = "README.md"
+repository = "https://github.com/Holzhaus/ssh-keydump"
+license = "MPL-2.0"
+keywords = ["ssh", "openssh", "key"]
+categories = ["cryptography", "command-line-utilities"]
+exclude = [".*"]
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
