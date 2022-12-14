@@ -139,14 +139,8 @@ fn dump_private_key(key: PrivateKey) -> Result<()> {
     println!("Encrypted: {:?}", key.is_encrypted());
     println!("KDF: {:02X?}", key.kdf());
     println!("Fingerprints:");
-    println!(
-        "    SHA256: {:02X?}",
-        key.fingerprint(HashAlg::Sha256).as_bytes()
-    );
-    println!(
-        "    SHA512: {:02X?}",
-        key.fingerprint(HashAlg::Sha512).as_bytes()
-    );
+    println!("    SHA256: {}", key.fingerprint(HashAlg::Sha256));
+    println!("    SHA512: {}", key.fingerprint(HashAlg::Sha512));
 
     match key.key_data() {
         KeypairData::Ecdsa(keypair) => dump_ecdsa_keypair(keypair),
